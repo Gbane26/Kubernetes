@@ -1,0 +1,54 @@
+---
+
+# PostgreSQL configuration
+postgresql:
+  image:
+    repository: postgres
+    tag: 15-alpine
+  database: etherpad
+  username: etherpaduser
+  password: etherpadpass
+  port: 5432
+  pgdata: /var/lib/postgresql/data/pgdata
+  storage:
+    size: 10Gi
+
+# Etherpad configuration
+etherpad:
+  image:
+    repository: etherpad/etherpad
+    tag: "2.0"
+  replicaCount: 1
+  adminPassword: adminpass
+  storage:
+    size: 5Gi
+  nodeEnv: development
+  defaultPadText: ""
+  disableIpLogging: true
+  soffice: ""
+  trustProxy: true
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: ""
+  annotations: {}
+  hosts:
+    - host: etherpad.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Backup configuration
+backup:
+  postgres:
+    enabled: true
+    schedule: "0 2 * * *"
+    storage:
+      size: 5Gi
+  etherpad:
+    enabled: true
+    schedule: "0 3 * * *"
+    storage:
+      size: 5Gi

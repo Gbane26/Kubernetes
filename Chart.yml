@@ -1,0 +1,8 @@
+---
+
+apiVersion: v2
+name: etherpad
+description: Déploiement d'un service Etherpad avec base PostgreSQL, sauvegardes automatisées et exposition via Ingress.
+type: application
+version: 1.0.0
+appVersion: "2.0"

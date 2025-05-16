@@ -1,0 +1,44 @@
+---
+
+{{- if .Values.backup.postgres.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+spec:
+  schedule: "{{ .Values.backup.postgres.schedule }}"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: pg-dump
+            image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
+            command:
+            - bash
+            - -c
+            - |
+              export PGPASSWORD=$POSTGRES_PASSWORD
+              pg_dump -h postgres -U $POSTGRES_USER $PGDATABASE > /backup/$(date +\%Y\%m\%d).sql
+            env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: PGDATABASE
+              value: {{ .Values.postgresql.database | quote }}
+            volumeMounts:
+            - name: backup
+              mountPath: /backup
+          restartPolicy: OnFailure
+          volumes:
+          - name: backup
+            persistentVolumeClaim:
+              claimName: postgres-backup
+{{- end }}
